@@ -1,0 +1,138 @@
+<div class="dashboard">
+  <header class="dashboard__header">
+    <div class="dashboard__header-text">
+      <h1 class="dashboard__title">Dashboard</h1>
+      <p class="dashboard__subtitle">
+        Visión general del catálogo de vulnerabilidades
+      </p>
+    </div>
+    @if (!isLoading && !hasError) {
+      <button
+        nz-button
+        nzType="default"
+        class="dashboard__export-btn"
+        [nzLoading]="isExporting"
+        (click)="exportPdf()"
+      >
+        <span nz-icon nzType="download" nzTheme="outline"></span>
+        Exportar PDF
+      </button>
+    }
+  </header>
+
+  @if (isLoading) {
+    <div class="dashboard__loading">
+      <nz-spin nzSize="large"></nz-spin>
+      <p class="dashboard__loading-text">Cargando estadísticas...</p>
+    </div>
+  } @else if (hasError) {
+    <nz-empty
+      nzNotFoundContent="No se han podido cargar las estadísticas del dashboard"
+    ></nz-empty>
+  } @else {
+    <!-- Tarjetas de resumen -->
+    <div nz-row [nzGutter]="[16, 16]" class="dashboard__stats">
+      @for (tile of statTiles; track tile.label) {
+        <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8">
+          <nz-card class="stat-card">
+            <div class="stat-card__body">
+              <div class="stat-card__icon" [style.color]="tile.colorVar">
+                <span nz-icon [nzType]="tile.icon" nzTheme="outline"></span>
+              </div>
+              <div class="stat-card__text">
+                <div class="stat-card__value">{{ formatNumber(tile.value) }}</div>
+                <div class="stat-card__label">{{ tile.label }}</div>
+              </div>
+            </div>
+          </nz-card>
+        </div>
+      }
+    </div>
+
+    <!-- Gráficas -->
+    <div nz-row [nzGutter]="[16, 16]" class="dashboard__charts">
+      <div nz-col [nzXs]="24" [nzLg]="8">
+        <nz-card nzTitle="Por severidad" class="chart-card">
+          <div class="chart-card__canvas chart-card__canvas--doughnut">
+            <canvas
+              baseChart
+              [data]="severityChartData"
+              [options]="doughnutOptions"
+              type="doughnut"
+            ></canvas>
+          </div>
+        </nz-card>
+      </div>
+
+      <div nz-col [nzXs]="24" [nzLg]="8">
+        <nz-card nzTitle="Última vulnerabilidad añadida" class="chart-card latest-card">
+          @if (latestVulnerability) {
+            <div class="latest-vuln">
+              <div class="latest-vuln__header">
+                <nz-tag [nzColor]="getSeverityTagColor(latestVulnerability.severity)">
+                  {{ latestVulnerability.severity }}
+                </nz-tag>
+                <span class="latest-vuln__category">{{ latestVulnerability.category }}</span>
+              </div>
+              <h3 class="latest-vuln__name">{{ latestVulnerability.name }}</h3>
+              <p class="latest-vuln__description">{{ latestVulnerability.description }}</p>
+              <div class="latest-vuln__footer">
+                <span nz-icon nzType="calendar" nzTheme="outline"></span>
+                {{ latestVulnerability.createdAt | date: 'dd/MM/yyyy' }}
+              </div>
+            </div>
+          } @else {
+            <nz-empty nzNotFoundContent="Sin datos disponibles"></nz-empty>
+          }
+        </nz-card>
+      </div>
+
+      <div nz-col [nzXs]="24" [nzLg]="8">
+        <nz-card nzTitle="Top 10 categorías" class="chart-card">
+          <div class="chart-card__canvas">
+            <canvas
+              baseChart
+              [data]="categoryChartData"
+              [options]="horizontalBarOptions"
+              type="bar"
+            ></canvas>
+          </div>
+        </nz-card>
+      </div>
+
+      <div nz-col [nzXs]="24" [nzLg]="14">
+        <nz-card nzTitle="Vulnerabilidades por año de publicación" class="chart-card">
+          @if (totalByYearEntries === 0) {
+            <nz-empty nzNotFoundContent="Sin datos de fecha disponibles"></nz-empty>
+          } @else {
+            <div class="chart-card__canvas">
+              <canvas
+                baseChart
+                [data]="yearChartData"
+                [options]="verticalBarOptions"
+                type="bar"
+              ></canvas>
+            </div>
+          }
+        </nz-card>
+      </div>
+
+      <div nz-col [nzXs]="24" [nzLg]="10">
+        <nz-card nzTitle="Top 10 frameworks/tecnologías" class="chart-card">
+          @if (frameworksChartData.labels?.length) {
+            <div class="chart-card__canvas">
+              <canvas
+                baseChart
+                [data]="frameworksChartData"
+                [options]="horizontalBarOptions"
+                type="bar"
+              ></canvas>
+            </div>
+          } @else {
+            <nz-empty nzNotFoundContent="Sin datos de framework disponibles"></nz-empty>
+          }
+        </nz-card>
+      </div>
+    </div>
+  }
+</div>
