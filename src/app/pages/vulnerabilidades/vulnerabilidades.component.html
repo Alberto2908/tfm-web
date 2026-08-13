@@ -1,0 +1,652 @@
+<!-- CONTENEDOR PRINCIPAL -->
+<div class="ver-container">
+  <header class="page-header">
+    <h1 class="page-header__title">Vulnerabilidades</h1>
+    <p class="page-header__subtitle">
+      Consulta, ordena y exporta el registro completo de hallazgos de seguridad.
+    </p>
+  </header>
+
+  <!-- FILTROS -->
+  <section class="filters-panel" aria-label="Filtros de búsqueda">
+    <button
+      type="button"
+      class="filters-panel__toggle"
+      (click)="toggleFilters()"
+      [attr.aria-expanded]="filtersExpanded"
+      aria-controls="filters-panel-body"
+    >
+      <span class="filters-panel__toggle-left">
+        <span nz-icon nzType="filter" nzTheme="outline" aria-hidden="true"></span>
+        <span class="filters-panel__toggle-title">Filtros de búsqueda</span>
+        @if (hasActiveFilters) {
+          <span class="filters-panel__badge">Activos</span>
+        }
+      </span>
+      <span class="filters-panel__toggle-right">
+        @if (searchExecuted && !isLoading) {
+          <span class="filters-panel__count">
+            {{ totalVulnerabilidad }} resultado{{ totalVulnerabilidad === 1 ? '' : 's' }}
+          </span>
+        }
+        <span
+          nz-icon
+          [nzType]="filtersExpanded ? 'up' : 'down'"
+          nzTheme="outline"
+          class="filters-panel__chevron"
+          aria-hidden="true"
+        ></span>
+      </span>
+    </button>
+
+    <div
+      id="filters-panel-body"
+      class="filters-panel__body"
+      [class.is-open]="filtersExpanded"
+      [attr.aria-hidden]="!filtersExpanded"
+    >
+      <div class="filters-panel__body-inner">
+        <div class="filters-panel__grid">
+      <div class="filter-field filter-field--wide">
+        <label for="filter-q">Búsqueda general</label>
+        <input
+          nz-input
+          id="filter-q"
+          [(ngModel)]="filters.q"
+          (keydown)="onFilterKeydown($event)"
+          placeholder="Nombre, descripción, impacto, mitigación..."
+        />
+      </div>
+
+      <div class="filter-field">
+        <label for="filter-name">Nombre</label>
+        <input
+          nz-input
+          id="filter-name"
+          [(ngModel)]="filters.name"
+          (keydown)="onFilterKeydown($event)"
+          placeholder="Filtrar por nombre"
+        />
+      </div>
+
+      <div class="filter-field">
+        <label for="filter-severity">Severidad</label>
+        <nz-select
+          id="filter-severity"
+          class="severity-select"
+          [(ngModel)]="filters.severity"
+          nzMode="multiple"
+          nzAllowClear
+          nzPlaceHolder="Todas"
+          [nzMaxTagCount]="3"
+          [nzCustomTemplate]="severityTag"
+          nzDropdownClassName="severity-dropdown"
+        >
+          @for (option of severityOptions; track option) {
+            <nz-option nzCustomContent [nzValue]="option" [nzLabel]="option">
+              <span
+                class="severity-option"
+                [ngClass]="'severity-option--' + getSeverityColor(option)"
+              >
+                <span
+                  class="severity-dot"
+                  [ngClass]="'severity-dot-' + getSeverityColor(option)"
+                ></span>
+                {{ option }}
+              </span>
+            </nz-option>
+          }
+        </nz-select>
+
+        <!-- Etiquetas ya seleccionadas dentro del campo -->
+        <ng-template #severityTag let-selected>
+          <span
+            class="severity-option"
+            [ngClass]="'severity-option--' + getSeverityColor(selected.nzValue)"
+          >
+            <span
+              class="severity-dot"
+              [ngClass]="'severity-dot-' + getSeverityColor(selected.nzValue)"
+            ></span>
+            {{ selected.nzLabel }}
+          </span>
+        </ng-template>
+      </div>
+
+      <div class="filter-field">
+        <label for="filter-category">Categoría</label>
+        <nz-select
+          id="filter-category"
+          [(ngModel)]="filters.category"
+          nzAllowClear
+          nzPlaceHolder="Todas"
+        >
+          @for (option of categoryOptions; track option) {
+            <nz-option [nzValue]="option" [nzLabel]="option"></nz-option>
+          }
+        </nz-select>
+      </div>
+
+      <div class="filter-field">
+        <label for="filter-framework">Framework</label>
+        <input
+          nz-input
+          id="filter-framework"
+          [(ngModel)]="filters.framework"
+          (keydown)="onFilterKeydown($event)"
+          placeholder="Ej: Angular, React"
+        />
+      </div>
+
+      <div class="filter-field">
+        <label for="filter-endpoint">Endpoint</label>
+        <input
+          nz-input
+          id="filter-endpoint"
+          [(ngModel)]="filters.endpoint"
+          (keydown)="onFilterKeydown($event)"
+          placeholder="Ej: /api/users"
+        />
+      </div>
+
+      <div class="filter-field">
+        <label for="filter-date-range">Fecha</label>
+        <nz-range-picker
+          id="filter-date-range"
+          [(ngModel)]="filters.dateRange"
+          nzFormat="dd/MM/yyyy"
+        ></nz-range-picker>
+      </div>
+        </div>
+
+        <div class="filters-panel__actions">
+          <div class="filters-panel__buttons">
+            <button
+              nz-button
+              nzType="primary"
+              (click)="applyFilters()"
+              [disabled]="isLoading"
+            >
+              Buscar
+            </button>
+            <button
+              nz-button
+              nzType="default"
+              (click)="clearFilters()"
+              [disabled]="!hasActiveFilters || isLoading"
+            >
+              Limpiar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TARJETA PRINCIPAL -->
+  <nz-card
+    [nzBordered]="true"
+    [nzBodyStyle]="{ padding: '0' }"
+    class="vulnerabilidad-card"
+  >
+    <!-- VISTA DESKTOP/TABLET -->
+    <div class="desktop-view">
+      <nz-spin [nzSpinning]="isLoading">
+      <div class="table-scroll" role="region" aria-label="Tabla de vulnerabilidades" tabindex="0">
+      <nz-table
+        class="vuln-table vuln-table--wide"
+        [nzData]="vulnerabilidades"
+        [nzShowPagination]="false"
+        [nzWidthConfig]="columnWidths"
+      >
+        <thead>
+          <tr>
+            <th
+              class="col-name"
+              nzColumnKey="name"
+              nzShowSort
+              [nzSortOrder]="
+                sortKeyVulnerabilidad === 'name'
+                  ? sortValueVulnerabilidad
+                  : null
+              "
+              (nzSortOrderChange)="onSortVulnerabilidad('name', $event)"
+            >
+              Nombre
+            </th>
+            <th
+              class="col-desc"
+              nzColumnKey="description"
+              nzShowSort
+              [nzSortOrder]="
+                sortKeyVulnerabilidad === 'description'
+                  ? sortValueVulnerabilidad
+                  : null
+              "
+              (nzSortOrderChange)="onSortVulnerabilidad('description', $event)"
+            >
+              Descripción
+            </th>
+            <th
+              class="col-severity"
+              nzColumnKey="severity"
+              nzShowSort
+              [nzSortOrder]="
+                sortKeyVulnerabilidad === 'severity'
+                  ? sortValueVulnerabilidad
+                  : null
+              "
+              (nzSortOrderChange)="onSortVulnerabilidad('severity', $event)"
+            >
+              Severidad
+            </th>
+            <th
+              class="col-category"
+              nzColumnKey="category"
+              nzShowSort
+              [nzSortOrder]="
+                sortKeyVulnerabilidad === 'category'
+                  ? sortValueVulnerabilidad
+                  : null
+              "
+              (nzSortOrderChange)="onSortVulnerabilidad('category', $event)"
+            >
+              Categoría
+            </th>
+            <th
+              class="col-framework"
+              nzColumnKey="framework"
+              nzShowSort
+              [nzSortOrder]="
+                sortKeyVulnerabilidad === 'framework'
+                  ? sortValueVulnerabilidad
+                  : null
+              "
+              (nzSortOrderChange)="onSortVulnerabilidad('framework', $event)"
+            >
+              Framework
+            </th>
+            <th class="col-endpoint">Endpoint</th>
+            <th class="col-payload">Payload</th>
+            <th class="col-impact">Impacto</th>
+            <th class="col-mitigation">Mitigación</th>
+            <th class="col-reference-url">URL</th>
+            <th
+              class="col-date"
+              nzColumnKey="createdAt"
+              nzShowSort
+              [nzSortOrder]="
+                sortKeyVulnerabilidad === 'createdAt'
+                  ? sortValueVulnerabilidad
+                  : null
+              "
+              (nzSortOrderChange)="onSortVulnerabilidad('createdAt', $event)"
+            >
+              Fecha
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let item of vulnerabilidades"
+            class="vuln-row"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="'Ver detalle de ' + item.name"
+            (click)="openDetail(item)"
+            (keydown)="onRowKeydown($event, item)"
+          >
+            <td class="col-name">{{ item.name }}</td>
+            <td class="col-desc">{{ item.description }}</td>
+            <td class="col-severity">
+              <nz-tag
+                [nzColor]="getSeverityColor(item.severity)"
+                style="font-weight: 600"
+                class="severity-tag"
+              >
+                <span
+                  class="severity-dot"
+                  [ngClass]="'severity-dot-' + getSeverityColor(item.severity)"
+                ></span>
+                {{ item.severity }}
+              </nz-tag>
+            </td>
+            <td class="col-category">{{ item.category }}</td>
+            <td class="col-framework">{{ item.framework }}</td>
+            <td class="col-endpoint">
+              @if (item.affectedEndpoint) {
+                <code class="tfm-code tfm-code--block">{{ item.affectedEndpoint }}</code>
+              } @else {
+                <i nz-icon nzType="minus"></i>
+              }
+            </td>
+            <td class="col-payload">
+              @if (item.payloadExample) {
+                <code class="tfm-code tfm-code--block">{{ item.payloadExample }}</code>
+              } @else {
+                <i nz-icon nzType="minus"></i>
+              }
+            </td>
+            <td class="col-impact">{{ item.impact }}</td>
+            <td class="col-mitigation">{{ item.mitigation }}</td>
+            <td class="col-reference-url">
+              <ng-container *ngIf="item.referenceURL; else noUrl">
+                <a
+                  class="reference-link"
+                  [href]="item.referenceURL"
+                  [attr.title]="item.referenceURL"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  (click)="$event.stopPropagation()"
+                >
+                  <span nz-icon nzType="link" nzTheme="outline" aria-hidden="true"></span>
+                  <span class="reference-link__text">{{ getUrlHost(item.referenceURL) }}</span>
+                </a>
+              </ng-container>
+              <ng-template #noUrl>
+                <i nz-icon nzType="minus"></i>
+              </ng-template>
+            </td>
+            <td class="col-date">{{ item.createdAt | date: 'dd/MM/yyyy' }}</td>
+          </tr>
+        </tbody>
+      </nz-table>
+      </div>
+      </nz-spin>
+    </div>
+
+    <!-- VISTA MÓVIL: tarjetas -->
+    <div class="mobile-view">
+      <ng-container *ngFor="let item of vulnerabilidades">
+        <nz-card
+          class="mobile-card vuln-row"
+          [nzBordered]="true"
+          tabindex="0"
+          role="button"
+          [attr.aria-label]="'Ver detalle de ' + item.name"
+          (click)="openDetail(item)"
+          (keydown)="onRowKeydown($event, item)"
+        >
+          <nz-card-meta
+            nzTitle="{{ item.name }}"
+            nzDescription="{{ item.description }}"
+          ></nz-card-meta>
+          <div class="card-content">
+            <p>
+              <strong>Severidad:</strong>
+              <nz-tag
+                [nzColor]="getSeverityColor(item.severity)"
+                style="font-weight: 600; margin-left: 0.5rem"
+                class="severity-tag"
+              >
+                <span
+                  class="severity-dot"
+                  [ngClass]="'severity-dot-' + getSeverityColor(item.severity)"
+                ></span>
+                {{ item.severity }}
+              </nz-tag>
+            </p>
+            <p><strong>Categoría:</strong> {{ item.category }}</p>
+            <p><strong>Framework:</strong> {{ item.framework }}</p>
+            <p><strong>Endpoint:</strong> {{ item.affectedEndpoint || '—' }}</p>
+            <p><strong>Payload:</strong> {{ item.payloadExample || '—' }}</p>
+            <p><strong>Impacto:</strong> {{ item.impact }}</p>
+            <p><strong>Mitigación:</strong> {{ item.mitigation }}</p>
+            <p>
+              <strong>URL:</strong>
+              <ng-container *ngIf="item.referenceURL; else noUrlMobile">
+                <a
+                  class="reference-link"
+                  [href]="item.referenceURL"
+                  [attr.title]="item.referenceURL"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  (click)="$event.stopPropagation()"
+                >
+                  <span nz-icon nzType="link" nzTheme="outline" aria-hidden="true"></span>
+                  <span class="reference-link__text">{{ getUrlHost(item.referenceURL) }}</span>
+                </a>
+              </ng-container>
+              <ng-template #noUrlMobile>
+                <i nz-icon nzType="minus"></i>
+              </ng-template>
+            </p>
+            <p><strong>Fecha:</strong> {{ item.createdAt | date: 'dd/MM/yyyy' }}</p>
+          </div>
+        </nz-card>
+      </ng-container>
+    </div>
+
+    <!-- PIE compartido: paginación + exportación -->
+    <div class="table-footer table-footer--exports">
+      <div class="table-footer__pagination">
+        <nav class="tfm-pager" aria-label="Paginación de vulnerabilidades">
+          <div class="tfm-pager__nav">
+            <button
+              type="button"
+              class="tfm-pager__btn"
+              (click)="goToPrevPage()"
+              [disabled]="!canGoPrev || isLoading"
+              aria-label="Página anterior"
+            >
+              <span nz-icon nzType="left" nzTheme="outline" aria-hidden="true"></span>
+            </button>
+
+            <div class="tfm-pager__status">
+              <span class="tfm-pager__label">Página</span>
+              <input
+                class="tfm-pager__input"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                [max]="totalPages || 1"
+                [ngModel]="pageInputDraft !== null ? pageInputDraft : pageIndexVulnerabilidad"
+                (ngModelChange)="pageInputDraft = $event"
+                (keydown.enter)="commitPageInput()"
+                (blur)="commitPageInput()"
+                [disabled]="isLoading || totalPages === 0"
+                [attr.aria-label]="'Página actual, de ' + totalPages"
+              />
+              <span class="tfm-pager__of">de</span>
+              <span class="tfm-pager__total" [attr.title]="totalPages + ' páginas'">
+                {{ totalPages | number: '1.0-0' : 'es' }}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              class="tfm-pager__btn"
+              (click)="goToNextPage()"
+              [disabled]="!canGoNext || isLoading"
+              aria-label="Página siguiente"
+            >
+              <span nz-icon nzType="right" nzTheme="outline" aria-hidden="true"></span>
+            </button>
+          </div>
+
+          <div class="tfm-pager__size">
+            <label class="tfm-pager__size-label" for="pager-page-size">Por página</label>
+            <nz-select
+              id="pager-page-size"
+              class="tfm-pager__size-select"
+              [ngModel]="pageSizeVulnerabilidad"
+              (ngModelChange)="onPageSizeChange($event)"
+              [nzDisabled]="isLoading"
+              nzSize="small"
+              [nzDropdownMatchSelectWidth]="false"
+            >
+              @for (size of pageSizeOptions; track size) {
+                <nz-option [nzValue]="size" [nzLabel]="'' + size"></nz-option>
+              }
+            </nz-select>
+          </div>
+        </nav>
+      </div>
+      <div class="table-footer__exports">
+        <button
+          type="button"
+          class="export-btn export-btn--primary"
+          (click)="openExportModal()"
+          [disabled]="!totalVulnerabilidad || isLoading"
+        >
+          <span nz-icon nzType="download" nzTheme="outline" aria-hidden="true"></span>
+          <span>Exportar</span>
+        </button>
+      </div>
+    </div>
+  </nz-card>
+</div>
+
+<nz-modal
+  [(nzVisible)]="isDetailModalVisible"
+  [nzTitle]="selectedVulnerability?.name ?? 'Detalle de vulnerabilidad'"
+  [nzFooter]="detailModalFooter"
+  (nzOnCancel)="closeDetail()"
+  nzWidth="720px"
+>
+  <ng-container *nzModalContent>
+    @if (selectedVulnerability; as item) {
+      <div class="vuln-detail">
+        <div class="vuln-detail__meta">
+          <nz-tag
+            [nzColor]="getSeverityColor(item.severity)"
+            class="severity-tag"
+          >
+            <span
+              class="severity-dot"
+              [ngClass]="'severity-dot-' + getSeverityColor(item.severity)"
+            ></span>
+            {{ item.severity }}
+          </nz-tag>
+          <span class="vuln-detail__category">{{ item.category }}</span>
+          <span class="vuln-detail__framework">{{ item.framework }}</span>
+        </div>
+
+        <dl class="vuln-detail__list">
+          <div class="vuln-detail__item vuln-detail__item--full">
+            <dt>Descripción</dt>
+            <dd>{{ item.description }}</dd>
+          </div>
+
+          <div class="vuln-detail__item">
+            <dt>Endpoint afectado</dt>
+            <dd>
+              @if (item.affectedEndpoint) {
+                <code class="tfm-code tfm-code--block">{{ item.affectedEndpoint }}</code>
+              } @else {
+                <span class="vuln-detail__empty">—</span>
+              }
+            </dd>
+          </div>
+
+          <div class="vuln-detail__item">
+            <dt>Payload de ejemplo</dt>
+            <dd>
+              @if (item.payloadExample) {
+                <code class="tfm-code tfm-code--block">{{ item.payloadExample }}</code>
+              } @else {
+                <span class="vuln-detail__empty">—</span>
+              }
+            </dd>
+          </div>
+
+          <div class="vuln-detail__item">
+            <dt>Impacto</dt>
+            <dd>{{ item.impact }}</dd>
+          </div>
+
+          <div class="vuln-detail__item">
+            <dt>Mitigación</dt>
+            <dd>{{ item.mitigation }}</dd>
+          </div>
+
+          <div class="vuln-detail__item vuln-detail__item--full">
+            <dt>URL de referencia</dt>
+            <dd>
+              @if (item.referenceURL) {
+                <a
+                  class="reference-link reference-link--modal"
+                  [href]="item.referenceURL"
+                  [attr.title]="item.referenceURL"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span nz-icon nzType="link" nzTheme="outline" aria-hidden="true"></span>
+                  <span class="reference-link__text">{{ item.referenceURL }}</span>
+                </a>
+              } @else {
+                <span class="vuln-detail__empty">—</span>
+              }
+            </dd>
+          </div>
+        </dl>
+      </div>
+    }
+  </ng-container>
+</nz-modal>
+
+<ng-template #detailModalFooter>
+  <button nz-button nzType="primary" (click)="closeDetail()">Cerrar</button>
+</ng-template>
+
+<nz-modal
+  [(nzVisible)]="isExportModalVisible"
+  nzTitle="Exportar vulnerabilidades"
+  [nzFooter]="exportModalFooter"
+  [nzMaskClosable]="!isExporting"
+  [nzClosable]="!isExporting"
+  (nzOnCancel)="closeExportModal()"
+  nzWidth="480px"
+>
+  <ng-container *nzModalContent>
+    <div class="export-modal">
+      <p class="export-modal__summary">
+        Se exportarán
+        <strong>{{ totalVulnerabilidad | number: '1.0-0' : 'es' }}</strong>
+        vulnerabilidad{{ totalVulnerabilidad === 1 ? '' : 'es' }}
+        @if (hasActiveFilters) {
+          <span>con los filtros aplicados actualmente.</span>
+        } @else {
+          <span>del catálogo completo.</span>
+        }
+      </p>
+
+      <div class="export-modal__field">
+        <label for="export-format">Formato</label>
+        <nz-select
+          id="export-format"
+          [(ngModel)]="exportFormat"
+          [nzDisabled]="isExporting"
+          class="export-modal__select"
+        >
+          @for (option of exportFormatOptions; track option.value) {
+            <nz-option
+              [nzValue]="option.value"
+              [nzLabel]="option.label"
+            ></nz-option>
+          }
+        </nz-select>
+        @for (option of exportFormatOptions; track option.value) {
+          @if (option.value === exportFormat) {
+            <p class="export-modal__hint">{{ option.hint }}</p>
+          }
+        }
+      </div>
+
+      @if (isExporting) {
+        <p class="export-modal__progress">
+          Generando el fichero. Con muchos resultados puede tardar unos segundos.
+        </p>
+      }
+    </div>
+  </ng-container>
+</nz-modal>
+
+<ng-template #exportModalFooter>
+  <button nz-button nzType="default" (click)="closeExportModal()" [disabled]="isExporting">
+    Cancelar
+  </button>
+  <button nz-button nzType="primary" (click)="confirmExport()" [nzLoading]="isExporting">
+    Descargar
+  </button>
+</ng-template>

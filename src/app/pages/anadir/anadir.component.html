@@ -1,0 +1,206 @@
+<div class="ver-container">
+  <header class="page-header">
+    <h1 class="page-header__title">Añadir vulnerabilidad</h1>
+    <p class="page-header__subtitle">
+      Documenta un hallazgo con severidad, impacto, mitigación y referencias.
+    </p>
+  </header>
+
+  <nz-card class="vulnerabilidad-card form-card" [nzBordered]="true">
+    <form
+      nz-form
+      nzLayout="vertical"
+      class="tfm-form"
+      [formGroup]="vulnerabilityForm"
+      (ngSubmit)="submitForm()"
+    >
+      <nz-form-item>
+        <nz-form-label nzFor="name" nzRequired>Nombre</nz-form-label>
+        <nz-form-control nzErrorTip="El nombre es obligatorio">
+          <input
+            nz-input
+            formControlName="name"
+            placeholder="Nombre de la vulnerabilidad"
+            id="name"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzFor="description" nzRequired>Descripción</nz-form-label>
+        <nz-form-control nzErrorTip="La descripción es obligatoria">
+          <textarea
+            nz-input
+            formControlName="description"
+            placeholder="Describe la vulnerabilidad"
+            id="description"
+            [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+          ></textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <div class="tfm-form-grid">
+        <nz-form-item>
+          <nz-form-label nzFor="severity" nzRequired>Severidad</nz-form-label>
+          <nz-form-control nzErrorTip="Selecciona la severidad">
+            <nz-select
+              formControlName="severity"
+              id="severity"
+              nzPlaceHolder="Selecciona severidad"
+            >
+              <nz-option nzValue="Crítica" nzLabel="Crítica" nzCustomContent>
+                <span class="severity-option">
+                  <span class="severity-dot severity-dot-red"></span>
+                  Crítica
+                </span>
+              </nz-option>
+              <nz-option nzValue="Alta" nzLabel="Alta" nzCustomContent>
+                <span class="severity-option">
+                  <span class="severity-dot severity-dot-orange"></span>
+                  Alta
+                </span>
+              </nz-option>
+              <nz-option nzValue="Media" nzLabel="Media" nzCustomContent>
+                <span class="severity-option">
+                  <span class="severity-dot severity-dot-gold"></span>
+                  Media
+                </span>
+              </nz-option>
+              <nz-option nzValue="Baja" nzLabel="Baja" nzCustomContent>
+                <span class="severity-option">
+                  <span class="severity-dot severity-dot-green"></span>
+                  Baja
+                </span>
+              </nz-option>
+              <nz-option nzValue="Informativa" nzLabel="Informativa" nzCustomContent>
+                <span class="severity-option">
+                  <span class="severity-dot severity-dot-default"></span>
+                  Informativa
+                </span>
+              </nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label nzFor="category" nzRequired>Categoría</nz-form-label>
+          <nz-form-control nzErrorTip="Selecciona la categoría">
+            <nz-select
+              formControlName="category"
+              id="category"
+              nzPlaceHolder="Selecciona categoría"
+            >
+              <nz-option nzValue="Injection" nzLabel="Injection"></nz-option>
+              <nz-option nzValue="XSS" nzLabel="XSS"></nz-option>
+              <nz-option nzValue="CSRF" nzLabel="CSRF"></nz-option>
+              <nz-option nzValue="Authentication" nzLabel="Authentication"></nz-option>
+              <nz-option nzValue="Authorization" nzLabel="Authorization"></nz-option>
+              <nz-option nzValue="Data Exposure" nzLabel="Data Exposure"></nz-option>
+              <nz-option nzValue="DoS" nzLabel="DoS"></nz-option>
+              <nz-option nzValue="Other" nzLabel="Other"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="tfm-form-grid">
+        <nz-form-item>
+          <nz-form-label nzFor="framework" nzRequired>Framework</nz-form-label>
+          <nz-form-control nzErrorTip="El framework es obligatorio">
+            <input
+              nz-input
+              formControlName="framework"
+              placeholder="Ej: React, Angular, Node.js"
+              id="framework"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label nzFor="affectedEndpoint" nzRequired>Endpoint afectado</nz-form-label>
+          <nz-form-control nzErrorTip="El endpoint es obligatorio">
+            <input
+              nz-input
+              formControlName="affectedEndpoint"
+              placeholder="Ej: /api/users/login"
+              id="affectedEndpoint"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <nz-form-item>
+        <nz-form-label nzFor="payloadExample">Payload de ejemplo</nz-form-label>
+        <nz-form-control>
+          <textarea
+            nz-input
+            formControlName="payloadExample"
+            placeholder="Payload o código de ejemplo"
+            id="payloadExample"
+            [nzAutosize]="{ minRows: 2, maxRows: 5 }"
+          ></textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <div class="tfm-form-grid">
+        <nz-form-item>
+          <nz-form-label nzFor="impact" nzRequired>Impacto</nz-form-label>
+          <nz-form-control nzErrorTip="El impacto es obligatorio">
+            <textarea
+              nz-input
+              formControlName="impact"
+              placeholder="Describe el impacto"
+              id="impact"
+              [nzAutosize]="{ minRows: 2, maxRows: 4 }"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label nzFor="mitigation" nzRequired>Mitigación</nz-form-label>
+          <nz-form-control nzErrorTip="La mitigación es obligatoria">
+            <textarea
+              nz-input
+              formControlName="mitigation"
+              placeholder="Describe la mitigación"
+              id="mitigation"
+              [nzAutosize]="{ minRows: 2, maxRows: 4 }"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <nz-form-item>
+        <nz-form-label nzFor="referenceURL">URL de referencia</nz-form-label>
+        <nz-form-control>
+          <input
+            nz-input
+            formControlName="referenceURL"
+            placeholder="https://example.com/reference"
+            id="referenceURL"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <div class="tfm-form-actions">
+        <button
+          nz-button
+          nzType="primary"
+          type="submit"
+          [disabled]="vulnerabilityForm.invalid || isSubmitting"
+        >
+          Guardar
+        </button>
+        <button
+          nz-button
+          nzType="default"
+          type="button"
+          (click)="resetForm()"
+          [disabled]="isSubmitting"
+        >
+          Limpiar
+        </button>
+      </div>
+    </form>
+  </nz-card>
+</div>
