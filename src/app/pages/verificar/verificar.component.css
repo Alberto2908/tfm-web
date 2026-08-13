@@ -1,0 +1,253 @@
+/* === HEADER CON HERRAMIENTAS DE ADMIN === */
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--tfm-space-md);
+}
+
+.page-header__tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--tfm-space-sm);
+  flex-shrink: 0;
+  /* Sin este límite los botones (que no se encogen) hacen la página más ancha
+     que la pantalla en tablet/móvil */
+  max-width: 100%;
+}
+
+.page-header__tools button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tfm-space-xs);
+  max-width: 100%;
+}
+
+/* === SEVERITY TAGS === */
+.severity-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tfm-space-sm);
+  padding: 0.375rem 0.875rem;
+  border-radius: var(--tfm-radius-full);
+  font-family: var(--tfm-font-mono);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.severity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.severity-dot-red {
+  background-color: #ff4d4f;
+  box-shadow: 0 0 8px rgba(255, 77, 79, 0.6);
+}
+
+.severity-dot-orange {
+  background-color: #fa8c16;
+  box-shadow: 0 0 8px rgba(250, 140, 22, 0.6);
+}
+
+.severity-dot-gold {
+  background-color: #faad14;
+  box-shadow: 0 0 8px rgba(250, 173, 20, 0.6);
+}
+
+.severity-dot-green {
+  background-color: #52c41a;
+  box-shadow: 0 0 8px rgba(82, 196, 26, 0.6);
+}
+
+.severity-dot-default {
+  background-color: #8c8c8c;
+  box-shadow: 0 0 8px rgba(140, 140, 140, 0.4);
+}
+
+/* === REFERENCE LINK (mobile cards) === */
+.reference-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tfm-space-xs);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  color: var(--tfm-primary);
+  font-family: var(--tfm-font-mono);
+  font-size: 0.8125rem;
+  text-decoration: none;
+  padding: var(--tfm-space-xs) var(--tfm-space-sm);
+  border-radius: var(--tfm-radius-sm);
+  background: var(--tfm-primary-glow);
+  transition: all var(--tfm-transition-fast);
+}
+
+.reference-link:hover {
+  background: var(--tfm-primary);
+  color: var(--tfm-text-inverted);
+}
+
+/* === VISTA DESKTOP/TABLET === */
+.desktop-view {
+  display: block;
+}
+
+.mobile-view {
+  display: none;
+}
+
+/* === VISTA TABLET/MÓVIL (tarjetas en vez de tabla) ===
+   Mismo criterio que en Vulnerabilidades: la tabla completa no cabe en
+   tablet, así que por debajo de 1024px se usa la vista de tarjetas, en
+   una sola columna, con los botones de acción al pie de cada tarjeta. */
+@media (max-width: 1024px) {
+  /* Los dos botones no caben en una fila: uno encima del otro */
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .page-header__tools {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .page-header__tools button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .desktop-view {
+    display: none !important;
+  }
+
+  .mobile-view {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: var(--tfm-space-lg);
+  }
+
+  .mobile-view .mobile-card {
+    border-radius: var(--tfm-radius-lg);
+    border: 1px solid var(--tfm-border);
+    overflow: hidden;
+    transition: all var(--tfm-transition-base);
+  }
+
+  .mobile-view .mobile-card:hover {
+    box-shadow: var(--tfm-shadow-lg);
+    transform: translateY(-2px);
+  }
+
+  .mobile-view .card-content p {
+    margin: var(--tfm-space-sm) 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--tfm-space-xs);
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .mobile-view .card-content p strong {
+    color: var(--tfm-text-secondary);
+    font-family: var(--tfm-font-display);
+    font-weight: 600;
+    min-width: 100px;
+  }
+
+  .mobile-view .card-content .reference-link {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .mobile-view nz-card-meta .ant-card-meta-title {
+    white-space: normal;
+    word-break: break-word;
+    font-family: var(--tfm-font-display);
+    font-weight: 700;
+    font-size: 1.125rem;
+  }
+
+  /* Botones de acción al pie de la tarjeta */
+  .mobile-view .card-actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--tfm-space-md);
+    margin-top: var(--tfm-space-md);
+    padding-top: var(--tfm-space-md);
+    border-top: 1px solid var(--tfm-border);
+  }
+
+  .mobile-view .card-actions .action-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* === MODAL DE EDICIÓN === */
+.edit-form {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: var(--tfm-space-sm);
+}
+
+/* === ANIMATIONS === */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.2);
+  }
+}
+
+/* Action buttons */
+.action-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--tfm-radius-sm) !important;
+  transition: all var(--tfm-transition-fast) !important;
+}
+
+.action-btn--edit {
+  color: var(--tfm-info) !important;
+}
+
+.action-btn--edit:hover {
+  background: var(--tfm-info-bg) !important;
+  color: var(--tfm-info) !important;
+}
+
+.action-btn--verify {
+  color: var(--tfm-success) !important;
+}
+
+.action-btn--verify:hover {
+  background: var(--tfm-success-bg) !important;
+  color: var(--tfm-success) !important;
+}
+
+.action-btn--delete {
+  color: var(--tfm-danger) !important;
+}
+
+.action-btn--delete:hover {
+  background: var(--tfm-danger-bg) !important;
+  color: var(--tfm-danger) !important;
+}

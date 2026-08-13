@@ -1,0 +1,517 @@
+<!-- CONTENEDOR PRINCIPAL -->
+<div class="ver-container">
+  <header class="page-header">
+    <div class="page-header__text">
+      <h1 class="page-header__title">Verificar vulnerabilidades</h1>
+      <p class="page-header__subtitle">
+        Revisa entradas pendientes, edita detalles y aprueba o elimina registros.
+      </p>
+    </div>
+    <div class="page-header__tools">
+      <button
+        nz-button
+        nzType="default"
+        [nzLoading]="isRunningAgent"
+        (click)="runAgentNow()"
+      >
+        <span nz-icon nzType="thunderbolt" nzTheme="outline"></span>
+        Ejecutar agente ahora
+      </button>
+      <button
+        nz-button
+        nzType="default"
+        [nzLoading]="isCheckingNvd"
+        (click)="checkNvdUpdates()"
+      >
+        <span nz-icon nzType="cloud-sync" nzTheme="outline"></span>
+        Buscar nuevos CVEs (NVD)
+      </button>
+    </div>
+  </header>
+
+  <!-- TARJETA PRINCIPAL -->
+  <nz-card
+    [nzBordered]="true"
+    [nzBodyStyle]="{ padding: '0' }"
+    class="vulnerabilidad-card"
+  >
+    <!-- VISTA DESKTOP/TABLET -->
+    <div class="desktop-view">
+      <div class="table-scroll" role="region" aria-label="Tabla de vulnerabilidades pendientes" tabindex="0">
+      <nz-table
+        class="vuln-table"
+        [nzData]="vulnerabilidades"
+        [nzShowPagination]="false"
+      >
+        <thead>
+          <tr>
+            <th
+              class="col-name"
+              nzColumnKey="name"
+              nzShowSort
+              [nzSortOrder]="
+                sortKeyVulnerabilidad === 'name'
+                  ? sortValueVulnerabilidad
+                  : null
+              "
+              (nzSortOrderChange)="onSortVulnerabilidad('name', $event)"
+            >
+              Nombre
+            </th>
+            <th
+              class="col-desc"
+              nzColumnKey="description"
+              nzShowSort
+              [nzSortOrder]="
+                sortKeyVulnerabilidad === 'description'
+                  ? sortValueVulnerabilidad
+                  : null
+              "
+              (nzSortOrderChange)="onSortVulnerabilidad('description', $event)"
+            >
+              Descripción
+            </th>
+            <th
+              class="col-severity"
+              nzColumnKey="severity"
+              nzShowSort
+              [nzSortOrder]="
+                sortKeyVulnerabilidad === 'severity'
+                  ? sortValueVulnerabilidad
+                  : null
+              "
+              (nzSortOrderChange)="onSortVulnerabilidad('severity', $event)"
+            >
+              Severidad
+            </th>
+            <th
+              class="col-category"
+              nzColumnKey="category"
+              nzShowSort
+              [nzSortOrder]="
+                sortKeyVulnerabilidad === 'category'
+                  ? sortValueVulnerabilidad
+                  : null
+              "
+              (nzSortOrderChange)="onSortVulnerabilidad('category', $event)"
+            >
+              Categoría
+            </th>
+            <th
+              class="col-framework"
+              nzColumnKey="framework"
+              nzShowSort
+              [nzSortOrder]="
+                sortKeyVulnerabilidad === 'framework'
+                  ? sortValueVulnerabilidad
+                  : null
+              "
+              (nzSortOrderChange)="onSortVulnerabilidad('framework', $event)"
+            >
+              Framework
+            </th>
+            <th class="col-endpoint">Endpoint</th>
+            <th class="col-payload">Payload</th>
+            <th class="col-impact">Impacto</th>
+            <th class="col-mitigation">Mitigación</th>
+            <th class="col-reference-url">URL</th>
+            <th class="col-user">Usuario</th>
+            <th class="col-acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of vulnerabilidades">
+            <td class="col-name">{{ item.name }}</td>
+            <td class="col-desc">{{ item.description }}</td>
+            <td class="col-severity">
+              <nz-tag
+                [nzColor]="getSeverityColor(item.severity)"
+                style="font-weight: 600"
+                class="severity-tag"
+              >
+                <span
+                  class="severity-dot"
+                  [ngClass]="'severity-dot-' + getSeverityColor(item.severity)"
+                ></span>
+                {{ item.severity }}
+              </nz-tag>
+            </td>
+            <td class="col-category">{{ item.category }}</td>
+            <td class="col-framework">{{ item.framework }}</td>
+            <td class="col-endpoint"><code class="tfm-code tfm-code--block">{{ item.affectedEndpoint }}</code></td>
+            <td class="col-payload"><code class="tfm-code tfm-code--block">{{ item.payloadExample }}</code></td>
+            <td class="col-impact">{{ item.impact }}</td>
+            <td class="col-mitigation">{{ item.mitigation }}</td>
+            <td class="col-reference-url">
+              <ng-container *ngIf="item.referenceURL; else noUrl">
+                <a
+                  class="reference-link"
+                  [href]="item.referenceURL"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ item.referenceURL }}
+                </a>
+              </ng-container>
+              <ng-template #noUrl>
+                <i nz-icon nzType="minus"></i>
+              </ng-template>
+            </td>
+            <td class="col-user">{{ item.createdBy }}</td>
+            <td class="col-acciones">
+              <button
+                nz-button
+                nzType="link"
+                class="action-btn action-btn--edit"
+                aria-label="Editar vulnerabilidad"
+                (click)="showEditVulnerabilidad(item)"
+              >
+                <i nz-icon nzType="edit"></i>
+              </button>
+              <button
+                nz-button
+                nzType="link"
+                class="action-btn action-btn--verify"
+                aria-label="Verificar vulnerabilidad"
+                (click)="verificarVulnerabilidad(item)"
+              >
+                <i nz-icon nzType="check"></i>
+              </button>
+              <button
+                nz-button
+                nzType="link"
+                class="action-btn action-btn--delete"
+                aria-label="Eliminar vulnerabilidad"
+                (click)="eliminarVulnerabilidad(item.id)"
+              >
+                <i nz-icon nzType="delete"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+      </div>
+
+      <!-- PIE: paginación -->
+      <div class="table-footer table-footer--center">
+        <nz-pagination
+          [(nzPageIndex)]="pageIndexVulnerabilidad"
+          [nzTotal]="totalVulnerabilidad"
+          [(nzPageSize)]="pageSizeVulnerabilidad"
+          [nzPageSizeOptions]="[5, 10, 20]"
+          (nzPageIndexChange)="onPageIndexChange($event)"
+          (nzPageSizeChange)="onPageSizeChange($event)"
+        ></nz-pagination>
+      </div>
+    </div>
+
+    <!-- VISTA MÓVIL: tarjetas -->
+    <div class="mobile-view">
+      <ng-container *ngFor="let item of vulnerabilidades">
+        <nz-card class="mobile-card" [nzBordered]="true">
+          <nz-card-meta
+            nzTitle="{{ item.name }}"
+            nzDescription="{{ item.description }}"
+          ></nz-card-meta>
+          <div class="card-content">
+            <p>
+              <strong>Severidad:</strong>
+              <nz-tag
+                [nzColor]="getSeverityColor(item.severity)"
+                style="font-weight: 600; margin-left: 0.5rem"
+                class="severity-tag"
+              >
+                <span
+                  class="severity-dot"
+                  [ngClass]="'severity-dot-' + getSeverityColor(item.severity)"
+                ></span>
+                {{ item.severity }}
+              </nz-tag>
+            </p>
+            <p><strong>Framework:</strong> {{ item.framework }}</p>
+            <p><strong>Endpoint:</strong> {{ item.affectedEndpoint }}</p>
+            <p><strong>Payload:</strong> {{ item.payloadExample }}</p>
+            <p><strong>Impacto:</strong> {{ item.impact }}</p>
+            <p><strong>Mitigación:</strong> {{ item.mitigation }}</p>
+            <p>
+              <strong>URL:</strong>
+              <ng-container *ngIf="item.referenceURL; else noUrlMobile">
+                <a
+                  class="reference-link"
+                  [href]="item.referenceURL"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ item.referenceURL }}
+                </a>
+              </ng-container>
+              <ng-template #noUrlMobile>
+                <i nz-icon nzType="minus"></i>
+              </ng-template>
+            </p>
+          </div>
+          <div class="card-actions">
+            <button
+              nz-button
+              nzType="link"
+              class="action-btn action-btn--edit"
+              aria-label="Editar vulnerabilidad"
+              (click)="showEditVulnerabilidad(item)"
+            >
+              <i nz-icon nzType="edit"></i>
+            </button>
+            <button
+              nz-button
+              nzType="link"
+              class="action-btn action-btn--verify"
+              aria-label="Verificar vulnerabilidad"
+              (click)="verificarVulnerabilidad(item)"
+            >
+              <i nz-icon nzType="check"></i>
+            </button>
+            <button
+              nz-button
+              nzType="link"
+              class="action-btn action-btn--delete"
+              aria-label="Eliminar vulnerabilidad"
+              (click)="eliminarVulnerabilidad(item.id)"
+            >
+              <i nz-icon nzType="delete"></i>
+            </button>
+          </div>
+        </nz-card>
+      </ng-container>
+
+      <!-- PAGINACIÓN MÓVIL -->
+      <div class="table-footer table-footer--center">
+        <nz-pagination
+          [(nzPageIndex)]="pageIndexVulnerabilidad"
+          [nzTotal]="totalVulnerabilidad"
+          [(nzPageSize)]="pageSizeVulnerabilidad"
+          [nzPageSizeOptions]="[5, 10, 20]"
+          nzSimple
+          (nzPageIndexChange)="onPageIndexChange($event)"
+          (nzPageSizeChange)="onPageSizeChange($event)"
+        ></nz-pagination>
+      </div>
+    </div>
+  </nz-card>
+</div>
+
+<!-- MODAL DE EDICIÓN -->
+<nz-modal
+  [(nzVisible)]="isEditModalVisible"
+  nzTitle="Editar Vulnerabilidad"
+  [nzFooter]="modalFooter"
+  (nzOnCancel)="handleEditCancel()"
+  nzWidth="720px"
+>
+  <ng-container *nzModalContent>
+    <form nz-form nzLayout="vertical" [formGroup]="editForm" class="tfm-form edit-form">
+      <!-- Nombre -->
+      <nz-form-item>
+        <nz-form-label [nzFor]="'edit-name'" [nzRequired]="true"
+          >Nombre</nz-form-label
+        >
+        <nz-form-control nzErrorTip="El nombre es obligatorio">
+          <input
+            nz-input
+            formControlName="name"
+            placeholder="Nombre de la vulnerabilidad"
+            id="edit-name"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Descripción -->
+      <nz-form-item>
+        <nz-form-label [nzFor]="'edit-description'" [nzRequired]="true"
+          >Descripción</nz-form-label
+        >
+        <nz-form-control nzErrorTip="La descripción es obligatoria">
+          <textarea
+            nz-input
+            formControlName="description"
+            placeholder="Describe la vulnerabilidad"
+            id="edit-description"
+            [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+          ></textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Severidad y Categoría (en fila) -->
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label [nzFor]="'edit-severity'" [nzRequired]="true"
+              >Severidad</nz-form-label
+            >
+            <nz-form-control nzErrorTip="Selecciona la severidad">
+              <nz-select
+                formControlName="severity"
+                id="edit-severity"
+                nzPlaceHolder="Selecciona severidad"
+              >
+                <nz-option nzValue="Crítica" nzLabel="Crítica"></nz-option>
+                <nz-option nzValue="Alta" nzLabel="Alta"></nz-option>
+                <nz-option nzValue="Media" nzLabel="Media"></nz-option>
+                <nz-option nzValue="Baja" nzLabel="Baja"></nz-option>
+                <nz-option
+                  nzValue="Informativa"
+                  nzLabel="Informativa"
+                ></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label [nzFor]="'edit-category'" [nzRequired]="true"
+              >Categoría</nz-form-label
+            >
+            <nz-form-control nzErrorTip="Selecciona la categoría">
+              <nz-select
+                formControlName="category"
+                id="edit-category"
+                nzPlaceHolder="Selecciona categoría"
+              >
+                <nz-option nzValue="Injection" nzLabel="Injection"></nz-option>
+                <nz-option nzValue="XSS" nzLabel="XSS"></nz-option>
+                <nz-option nzValue="CSRF" nzLabel="CSRF"></nz-option>
+                <nz-option
+                  nzValue="Authentication"
+                  nzLabel="Authentication"
+                ></nz-option>
+                <nz-option
+                  nzValue="Authorization"
+                  nzLabel="Authorization"
+                ></nz-option>
+                <nz-option
+                  nzValue="Data Exposure"
+                  nzLabel="Data Exposure"
+                ></nz-option>
+                <nz-option nzValue="DoS" nzLabel="DoS"></nz-option>
+                <nz-option nzValue="Other" nzLabel="Other"></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <!-- Framework y Endpoint (en fila) -->
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label [nzFor]="'edit-framework'" [nzRequired]="true"
+              >Framework</nz-form-label
+            >
+            <nz-form-control nzErrorTip="El framework es obligatorio">
+              <input
+                nz-input
+                formControlName="framework"
+                placeholder="Ej: React, Angular, Node.js"
+                id="edit-framework"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label [nzFor]="'edit-endpoint'" [nzRequired]="true"
+              >Endpoint afectado</nz-form-label
+            >
+            <nz-form-control nzErrorTip="El endpoint es obligatorio">
+              <input
+                nz-input
+                formControlName="affectedEndpoint"
+                placeholder="Ej: /api/users/login"
+                id="edit-endpoint"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <!-- Payload Example -->
+      <nz-form-item>
+        <nz-form-label [nzFor]="'edit-payload'"
+          >Payload de ejemplo</nz-form-label
+        >
+        <nz-form-control>
+          <textarea
+            nz-input
+            formControlName="payloadExample"
+            placeholder="Payload o código de ejemplo"
+            id="edit-payload"
+            [nzAutosize]="{ minRows: 2, maxRows: 5 }"
+          ></textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Impacto y Mitigación (en fila) -->
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label [nzFor]="'edit-impact'" [nzRequired]="true"
+              >Impacto</nz-form-label
+            >
+            <nz-form-control nzErrorTip="El impacto es obligatorio">
+              <textarea
+                nz-input
+                formControlName="impact"
+                placeholder="Describe el impacto"
+                id="edit-impact"
+                [nzAutosize]="{ minRows: 2, maxRows: 4 }"
+              ></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="12">
+          <nz-form-item>
+            <nz-form-label [nzFor]="'edit-mitigation'" [nzRequired]="true"
+              >Mitigación</nz-form-label
+            >
+            <nz-form-control nzErrorTip="La mitigación es obligatoria">
+              <textarea
+                nz-input
+                formControlName="mitigation"
+                placeholder="Describe la mitigación"
+                id="edit-mitigation"
+                [nzAutosize]="{ minRows: 2, maxRows: 4 }"
+              ></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <!-- URL de referencia -->
+      <nz-form-item>
+        <nz-form-label [nzFor]="'edit-reference'"
+          >URL de referencia</nz-form-label
+        >
+        <nz-form-control>
+          <input
+            nz-input
+            formControlName="referenceURL"
+            placeholder="https://example.com/reference"
+            id="edit-reference"
+          />
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+</nz-modal>
+
+<ng-template #modalFooter>
+  <button nz-button nzType="default" (click)="handleEditCancel()">
+    Cancelar
+  </button>
+  <button
+    nz-button
+    nzType="primary"
+    [disabled]="editForm.invalid"
+    (click)="handleEditOk()"
+  >
+    Guardar
+  </button>
+</ng-template>
