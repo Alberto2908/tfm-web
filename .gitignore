@@ -8,8 +8,9 @@
 .angular/
 
 # Node modules and dependency files
+# package-lock.json SI se versiona: Vercel usa `npm ci`, que requiere el
+# lockfile para instalar dependencias de forma reproducible.
 /node_modules/
-/package-lock.json
 /yarn.lock
 
 # Environment files
