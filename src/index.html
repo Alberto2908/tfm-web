@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <script>
+    (function () {
+      var theme = localStorage.getItem('tfm-theme');
+      document.documentElement.setAttribute(
+        'data-theme',
+        theme === 'dark' ? 'dark' : 'light'
+      );
+    })();
+  </script>
+  <title>VulnRadar</title>
+  <meta name="description" content="Plataforma para documentar, consultar y verificar vulnerabilidades de seguridad web.">
+  <meta name="theme-color" content="#fafaf9">
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>

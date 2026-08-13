@@ -1,0 +1,17 @@
+/* ============================================
+   MAIN CONTENT - EDITORIAL/TECHNICAL DESIGN
+   ============================================ */
+
+.main-content {
+  /* Compensa el navbar fijo, cuya altura cambia en móvil/tablet */
+  padding-top: var(--tfm-navbar-height);
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  background-color: var(--tfm-bg);
+  position: relative;
+  z-index: 1;
+  /* Evita que un contenido demasiado ancho ensanche el viewport y
+     empuje los botones del navbar fuera de la pantalla */
+  overflow-x: clip;
+}
