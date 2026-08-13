@@ -1,0 +1,216 @@
+# ═══════════════════════════════════════════════════════════════
+# FRONTEND DESIGN RULES — tfm-web (TFM Vulnerabilidades)
+# Stack: Angular 19 + ng-zorro-antd + SweetAlert2 + CSS puro
+# ═══════════════════════════════════════════════════════════════
+# Aplica siempre que toques cualquier .ts, .html, .css del frontend.
+# ═══════════════════════════════════════════════════════════════
+
+## 0. IDENTIDAD VISUAL DEL PROYECTO
+
+Este es el frontend de un TFM sobre gestión de vulnerabilidades de seguridad.
+La dirección estética es **editorial-técnica**: limpia, precisa, con acentos
+cyber (cyan eléctrico + violeta), tipografía legible y sensación de herramienta
+profesional de seguridad. Soporta light/dark mode vía `data-theme`.
+
+Antes de codificar cualquier componente declara:
+- Dirección estética confirmada (no la cambies salvo petición explícita)
+- Si reutilizas tokens ya definidos en `src/styles.css`
+- Qué componentes ng-zorro usarás y si necesitas overrides en styles.css
+
+---
+
+## 1. DESIGN TOKENS — Única fuente de verdad
+
+Todos los valores visuales viven en `src/styles.css` como variables `--tfm-*`.
+NUNCA pongas colores, fuentes o shadows hardcodeados en componentes.
+
+### Paleta activa del proyecto
+```css
+/* Primarios */
+--tfm-primary:       #00d4aa;   /* cyan eléctrico — CTA, links, focus */
+--tfm-secondary:     #7c3aed;   /* violeta — gradientes, acentos secundarios */
+--tfm-accent:        #f59e0b;   /* ámbar — warnings, badges de severidad */
+
+/* Superficies (light mode) */
+--tfm-bg:            #fafaf9;
+--tfm-surface:       #ffffff;
+--tfm-text:          #1c1917;
+--tfm-text-muted:    #78716c;
+
+/* Semánticos */
+--tfm-success:       #10b981;
+--tfm-warning:        #f59e0b;
+--tfm-danger:         #ef4444;
+--tfm-info:           #3b82f6;
+```
+
+Los valores dark mode están en `[data-theme="dark"]` — no dupliques lógica
+de tema en componentes; usa `ThemeService` para toggle.
+
+### Tipografía
+```css
+--tfm-font-display:   'Outfit', sans-serif;        /* headings, botones */
+--tfm-font-body:      'Outfit', sans-serif;        /* cuerpo */
+--tfm-font-mono:      'JetBrains Mono', monospace; /* código, tags, CVE */
+--tfm-font-technical: 'Space Grotesk', sans-serif; /* labels técnicos */
+```
+
+**Usa `--tfm-font-mono`** para IDs de vulnerabilidad, CVE, hashes y datos técnicos.
+
+---
+
+## 2. ANGULAR — Protocolo obligatorio
+
+### Estructura de componentes
+- Páginas en `src/app/pages/`
+- Componentes reutilizables en `src/app/components/`
+- Servicios en `src/app/service/` o `src/app/services/`
+- Interfaces en `src/app/interfaces/`
+
+### Reglas de Angular 19
+- Usa **standalone components** (patrón ya establecido en el proyecto)
+- Control flow moderno: `@if`, `@for`, `@switch` — no `*ngIf`/`*ngFor` legacy
+- Rutas en `app.routes.ts` — paths en español (`/vulnerabilidades`, `/registrar`)
+- Inyecta dependencias con `inject()` cuando sea posible
+- SSR: comprueba `isPlatformBrowser` antes de acceder a `window`/`localStorage`
+
+### ng-zorro-antd
+- Importa solo los módulos/componentes que necesites en cada standalone component
+- **NO** sobreescribas estilos de ng-zorro en componentes — los overrides globales
+  viven en `src/styles.css` bajo la sección `NG-ZORRO-ANTD THEMING`
+- Si añades un componente ng-zorro nuevo, añade sus overrides temáticos en styles.css
+
+### SweetAlert2
+- Usa SweetAlert2 para confirmaciones y alertas (no `alert()` nativo)
+- Los estilos ya están tematizados en styles.css — no los dupliques
+
+---
+
+## 3. COMPONENTES — Patrones específicos del proyecto
+
+### Estructura de página
+```html
+<div class="page-container">
+  <div class="container">
+    <!-- contenido -->
+  </div>
+</div>
+```
+
+La clase `.container` (max-width 1400px) ya está definida en styles.css.
+
+### Animaciones de entrada
+Usa las clases utilitarias existentes en lugar de animaciones ad-hoc:
+```html
+<div class="animate-slide-up delay-100">...</div>
+<div class="animate-fade-in delay-200">...</div>
+```
+
+Clases disponibles: `animate-fade-in`, `animate-slide-up`, `animate-slide-down`,
+`animate-scale-in`, `animate-float`, `animate-pulse-glow`
+Delays: `delay-100` a `delay-500`
+
+**Respeta `prefers-reduced-motion`:**
+```css
+@media (prefers-reduced-motion: reduce) {
+  .animate-slide-up, .animate-fade-in { animation: none; opacity: 1; transform: none; }
+}
+```
+
+### Texto con gradiente (títulos hero)
+```html
+<h1 class="text-gradient">Vulnerabilidades</h1>
+```
+
+### Datos técnicos / CVE
+```html
+<span class="text-mono">CVE-2024-12345</span>
+```
+
+### Botones custom (fuera de ng-zorro)
+Sigue el patrón de `home.component.css`: BEM con prefijo de página
+(`home-btn`, `home-btn--primary`). Usa variables `--tfm-*` y `--tfm-radius-*`.
+
+---
+
+## 4. TEMA LIGHT/DARK
+
+- `ThemeService` gestiona el tema vía `data-theme` en `<html>`
+- Persistencia en `localStorage` key `tfm-theme`
+- **NUNCA** hardcodees colores que no funcionen en ambos modos
+- Usa siempre variables CSS — cambian automáticamente con `[data-theme="dark"]`
+- El navbar/footer usan `--tfm-accent-bar` — respeta ese contraste
+
+---
+
+## 5. LAYOUT — Prohibiciones y patrones correctos
+
+**PROHIBIDO:**
+- Colores hardcodeados (`#fff`, `#000`, `rgb(...)`) en component CSS
+- Instalar librerías UI adicionales (Material, PrimeNG, Tailwind) sin petición
+- Ignorar el design system y usar estilos por defecto de ng-zorro sin theming
+- `outline: none` sin reemplazo visible en elementos interactivos
+- Mezclar inglés y español en la UI (el proyecto está en español)
+
+**CORRECTO para este proyecto:**
+- Cards ng-zorro con hover sutil (ya definido en styles.css)
+- Tablas con headers uppercase y font mono en paginación
+- Tags con `border-radius: full` para severidad/estado
+- Gradientes cyan→violeta en títulos destacados (`.text-gradient`)
+- Fondo con patrón radial sutil (ya en `body::before`)
+
+---
+
+## 6. ACCESIBILIDAD (no negociable)
+
+- Contraste mínimo 4.5:1 texto normal
+- Focus rings: `outline: 2px solid var(--tfm-primary)` (ya global en styles.css)
+- Touch targets mínimo 44×44px en mobile
+- Labels visibles en formularios (ng-zorro `nz-form-label`)
+- `aria-label` en botones icon-only
+- Animaciones respetan `prefers-reduced-motion`
+
+---
+
+## 7. RESPONSIVIDAD
+
+- Mobile-first
+- Usa `.container` con padding responsive (`--tfm-space-lg`)
+- `min-height: 100vh` en app-root (ya configurado)
+- Sin scroll horizontal en ningún breakpoint
+- La navbar ya tiene diseño responsive — no la rediseñes sin petición
+
+---
+
+## 8. API Y SERVICIOS
+
+- `VulnerabilityService` → CRUD de vulnerabilidades
+- `AuthService` + `auth.interceptor.ts` → autenticación JWT
+- URLs de API en `src/environments/environment.ts`
+- No mezcles lógica de negocio en templates — mantén en servicios
+
+---
+
+## 9. CHECKLIST ANTES DE ENTREGAR CUALQUIER COMPONENTE
+
+□ ¿Todos los colores usan variables `--tfm-*` de styles.css?
+□ ¿Funciona en light Y dark mode?
+□ ¿Los textos de UI están en español?
+□ ¿ng-zorro usa los overrides globales, no estilos inline?
+□ ¿Animaciones usan clases utilitarias o respetan reduced-motion?
+□ ¿Standalone component con imports mínimos?
+□ ¿Control flow moderno (@if/@for) en templates?
+□ ¿Focus states visibles en todos los interactivos?
+□ ¿Datos técnicos usan `.text-mono`?
+□ ¿El componente encaja con la identidad editorial-técnica del TFM?
+
+---
+
+## 10. REFERENCIAS DE ARCHIVOS EXISTENTES
+
+- `src/styles.css` → fuente única de tokens, theming ng-zorro y SweetAlert2
+- `src/app/services/theme.service.ts` → toggle light/dark
+- `src/app/components/navbar/` → navegación principal
+- `src/app/pages/ver/` → listado de vulnerabilidades (tabla ng-zorro)
+- `src/app/pages/anadir/` → formulario de creación
+- `src/app/interfaces/vulnerability.ts` → modelo de datos
