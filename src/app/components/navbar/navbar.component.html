@@ -1,0 +1,227 @@
+<nav class="tfm-navbar" aria-label="Navegación principal">
+  <div class="tfm-navbar__inner">
+    <!-- Logo/Brand -->
+    <a class="tfm-navbar__brand" routerLink="/" (click)="closeMenu()">
+      <div class="tfm-navbar__logo">
+        <svg class="tfm-navbar__shield" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        <span class="tfm-navbar__brand-text">VulnRadar</span>
+      </div>
+    </a>
+
+    <!-- Desktop Navigation - Login/Register (si NO autenticado) -->
+    @if (!(isAuthenticated$ | async)) {
+      <ul class="tfm-navbar__links tfm-navbar__links--desktop">
+        @for (link of authLinks; track link.route) {
+          <li class="tfm-navbar__item">
+            <a
+              class="tfm-navbar__link"
+              [routerLink]="link.route"
+              routerLinkActive="tfm-navbar__link--active"
+              [routerLinkActiveOptions]="{ exact: true }"
+            >
+              {{ link.label }}
+            </a>
+          </li>
+        }
+      </ul>
+    }
+
+    <!-- Si está autenticado: mostrar opciones principales -->
+    @if (isAuthenticated$ | async) {
+      <ul class="tfm-navbar__links tfm-navbar__links--desktop">
+        <!-- Dashboard (cualquier usuario logueado) -->
+        <li class="tfm-navbar__item">
+          <a
+            class="tfm-navbar__link"
+            [routerLink]="dashboardLink.route"
+            routerLinkActive="tfm-navbar__link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            {{ dashboardLink.label }}
+          </a>
+        </li>
+        <!-- Verificar (solo ADMIN) -->
+        @if (isAdmin()) {
+          <li class="tfm-navbar__item">
+            <a
+              class="tfm-navbar__link"
+              [routerLink]="adminLink.route"
+              routerLinkActive="tfm-navbar__link--active"
+              [routerLinkActiveOptions]="{ exact: true }"
+            >
+              {{ adminLink.label }}
+            </a>
+          </li>
+        }
+        <!-- Vulnerabilidades, Añadir -->
+        @for (link of mainLinks; track link.route) {
+          <li class="tfm-navbar__item">
+            <a
+              class="tfm-navbar__link"
+              [routerLink]="link.route"
+              routerLinkActive="tfm-navbar__link--active"
+              [routerLinkActiveOptions]="{ exact: true }"
+            >
+              {{ link.label }}
+            </a>
+          </li>
+        }
+        <!-- Usuario y Logout -->
+        <li class="tfm-navbar__item">
+          <a
+            class="tfm-navbar__user"
+            routerLink="/perfil"
+            routerLinkActive="tfm-navbar__user--active"
+            (click)="closeMenu()"
+          >
+            {{ (currentUser$ | async)?.username }}
+          </a>
+        </li>
+        <li class="tfm-navbar__item">
+          <button class="tfm-navbar__logout" (click)="logout()">Logout</button>
+        </li>
+      </ul>
+    }
+
+    <div class="tfm-navbar__actions">
+      <!-- Theme Toggle -->
+      <button
+        class="tfm-navbar__theme-toggle"
+        type="button"
+        (click)="toggleTheme()"
+        [attr.aria-label]="
+          isDark() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'
+        "
+      >
+        @if (isDark()) {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        } @else {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        }
+      </button>
+
+      <!-- Mobile Toggle -->
+      <button
+        type="button"
+        class="tfm-navbar__toggle"
+        [class.is-open]="isMenuOpen"
+        [attr.aria-label]="isMenuOpen ? 'Cerrar menú' : 'Abrir menú'"
+        [attr.aria-expanded]="isMenuOpen"
+        aria-controls="tfm-navbar-mobile"
+        (click)="toggleMenu()"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div
+    id="tfm-navbar-mobile"
+    class="tfm-navbar__mobile"
+    [class.is-open]="isMenuOpen"
+  >
+    @if (!(isAuthenticated$ | async)) {
+      <ul class="tfm-navbar__mobile-list">
+        @for (link of authLinks; track link.route) {
+          <li class="tfm-navbar__mobile-item">
+            <a
+              class="tfm-navbar__mobile-link"
+              [routerLink]="link.route"
+              (click)="closeMenu()"
+            >
+              {{ link.label }}
+            </a>
+          </li>
+        }
+      </ul>
+    }
+    @if (isAuthenticated$ | async) {
+      <ul class="tfm-navbar__mobile-list">
+        <!-- Dashboard (cualquier usuario logueado) -->
+        <li class="tfm-navbar__mobile-item">
+          <a
+            class="tfm-navbar__mobile-link"
+            [routerLink]="dashboardLink.route"
+            (click)="closeMenu()"
+          >
+            {{ dashboardLink.label }}
+          </a>
+        </li>
+        <!-- Verificar (solo ADMIN) -->
+        @if (isAdmin()) {
+          <li class="tfm-navbar__mobile-item">
+            <a
+              class="tfm-navbar__mobile-link"
+              [routerLink]="adminLink.route"
+              (click)="closeMenu()"
+            >
+              {{ adminLink.label }}
+            </a>
+          </li>
+        }
+        <!-- Vulnerabilidades, Añadir -->
+        @for (link of mainLinks; track link.route) {
+          <li class="tfm-navbar__mobile-item">
+            <a
+              class="tfm-navbar__mobile-link"
+              [routerLink]="link.route"
+              (click)="closeMenu()"
+            >
+              {{ link.label }}
+            </a>
+          </li>
+        }
+        <!-- Usuario y Logout -->
+        <li class="tfm-navbar__mobile-item">
+          <a
+            class="tfm-navbar__mobile-link tfm-navbar__user"
+            routerLink="/perfil"
+            (click)="closeMenu()"
+          >
+            {{ (currentUser$ | async)?.username }}
+          </a>
+        </li>
+        <li class="tfm-navbar__mobile-item">
+          <button class="tfm-navbar__logout" (click)="logout()">Logout</button>
+        </li>
+      </ul>
+    }
+  </div>
+</nav>

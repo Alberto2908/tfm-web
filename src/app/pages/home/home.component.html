@@ -1,0 +1,104 @@
+<div class="home-container">
+  <div class="home-hero">
+    @if (isLoggedIn) {
+      <h1 class="home-title home-title--greeting">
+        Hola, <span>{{ username }}</span>
+      </h1>
+      <p class="home-subtitle">
+        Bienvenido a VulnRadar. Explora el catálogo de vulnerabilidades web,
+        analiza las métricas y documenta nuevos hallazgos.
+      </p>
+
+      <div class="home-actions">
+
+        <a class="action-card" routerLink="/dashboard">
+          <span class="action-card__icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </span>
+          <span class="action-card__content">
+            <strong>Dashboard</strong>
+            <small>Gráficas por severidad, categoría, año y tecnología, con informe PDF</small>
+          </span>
+          <span class="action-card__arrow" aria-hidden="true">→</span>
+        </a>
+
+        @if (isAdmin) {
+          <a class="action-card action-card--admin" routerLink="/vulnerabilidades/verificar">
+            <span class="action-card__icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            </span>
+            <span class="action-card__content">
+              <strong>Verificar pendientes</strong>
+              <small>Aprueba o edita entradas, lanza el agente de IA y busca nuevos CVEs</small>
+            </span>
+            <span class="action-card__arrow" aria-hidden="true">→</span>
+          </a>
+        }
+
+        <a class="action-card" routerLink="/vulnerabilidades">
+          <span class="action-card__icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </span>
+          <span class="action-card__content">
+            <strong>Ver vulnerabilidades</strong>
+            <small>Filtra el catálogo y expórtalo en JSON, XML, CSV o PDF</small>
+          </span>
+          <span class="action-card__arrow" aria-hidden="true">→</span>
+        </a>
+
+        <a class="action-card" routerLink="/vulnerabilidades/crear">
+          <span class="action-card__icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          </span>
+          <span class="action-card__content">
+            <strong>Añadir vulnerabilidad</strong>
+            <small>Documenta un hallazgo: severidad, impacto, mitigación y referencia</small>
+          </span>
+          <span class="action-card__arrow" aria-hidden="true">→</span>
+        </a>
+
+      </div>
+    } @else {
+      <h1 class="home-title">
+        <span>VulnRadar</span>
+      </h1>
+      <p class="home-subtitle">
+        Decenas de miles de CVE reales importados de la NVD, clasificados por
+        severidad CVSS y documentados con impacto, mitigación y referencias.
+        Fíltralos, analízalos y expórtalos.
+      </p>
+
+      <div class="home-buttons">
+        <a class="home-btn home-btn--primary" routerLink="/login">Iniciar sesión</a>
+        <a class="home-btn home-btn--secondary" routerLink="/registrar">Registrarse</a>
+      </div>
+
+      <ul class="home-features" aria-label="Características principales">
+        <li>
+          <span class="home-features__num">01</span>
+          <span>CVE importados de la NVD con severidad CVSS y referencia oficial</span>
+        </li>
+        <li>
+          <span class="home-features__num">02</span>
+          <span>Categorías tipo CWE/OWASP: inyección, XSS, CSRF, exposición de datos, DoS…</span>
+        </li>
+        <li>
+          <span class="home-features__num">03</span>
+          <span>Filtros combinados por severidad, categoría, framework, endpoint y fechas</span>
+        </li>
+        <li>
+          <span class="home-features__num">04</span>
+          <span>Dashboard con métricas y gráficas por severidad, categoría, año y tecnología</span>
+        </li>
+        <li>
+          <span class="home-features__num">05</span>
+          <span>Exportación del resultado filtrado en JSON, XML, CSV y PDF</span>
+        </li>
+        <li>
+          <span class="home-features__num">06</span>
+          <span>Agente de IA que propone hallazgos y administradores que los verifican</span>
+        </li>
+      </ul>
+    }
+  </div>
+</div>
