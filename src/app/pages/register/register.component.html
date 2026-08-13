@@ -1,0 +1,187 @@
+<section class="auth-page">
+  <div class="auth-card">
+    <div class="auth-icon" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+      </svg>
+    </div>
+    <h1 class="auth-title">Registrar</h1>
+
+    <form class="auth-form" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <label class="auth-label">
+        Nombre de usuario
+        <input
+          class="auth-input"
+          type="text"
+          autocomplete="username"
+          formControlName="username"
+          placeholder="Introduce tu nombre de usuario"
+        />
+        <div
+          *ngIf="
+            registerForm.get('username')?.errors?.['required'] &&
+            registerForm.get('username')?.touched
+          "
+          class="auth-error-message"
+        >
+          El nombre de usuario es obligatorio
+        </div>
+        <div
+          *ngIf="
+            registerForm.get('username')?.errors?.['minlength'] &&
+            registerForm.get('username')?.touched
+          "
+          class="auth-error-message"
+        >
+          Mínimo 3 caracteres
+        </div>
+        <div
+          *ngIf="registerForm.get('username')?.pending"
+          class="auth-hint"
+        >
+          Comprobando disponibilidad...
+        </div>
+        <div
+          *ngIf="
+            registerForm.get('username')?.errors?.['usernameTaken'] &&
+            !registerForm.get('username')?.pending
+          "
+          class="auth-error-message"
+        >
+          El nombre de usuario ya está en uso
+        </div>
+      </label>
+
+      <label class="auth-label">
+        Email
+        <input
+          class="auth-input"
+          type="email"
+          autocomplete="email"
+          formControlName="email"
+          placeholder="Introduce tu email"
+        />
+        <div
+          *ngIf="
+            registerForm.get('email')?.errors?.['required'] &&
+            registerForm.get('email')?.touched
+          "
+          class="auth-error-message"
+        >
+          El email es obligatorio
+        </div>
+        <div
+          *ngIf="
+            registerForm.get('email')?.errors?.['email'] &&
+            registerForm.get('email')?.touched
+          "
+          class="auth-error-message"
+        >
+          Introduce un email válido
+        </div>
+        <div *ngIf="registerForm.get('email')?.pending" class="auth-hint">
+          Comprobando disponibilidad...
+        </div>
+        <div
+          *ngIf="
+            registerForm.get('email')?.errors?.['emailTaken'] &&
+            !registerForm.get('email')?.pending
+          "
+          class="auth-error-message"
+        >
+          El email ya está registrado
+        </div>
+      </label>
+
+      <label class="auth-label">
+        Contraseña
+        <app-password-input
+          formControlName="password"
+          autocomplete="new-password"
+          placeholder="Introduce tu contraseña"
+        />
+        <div
+          *ngIf="
+            registerForm.get('password')?.errors?.['required'] &&
+            registerForm.get('password')?.dirty
+          "
+          class="auth-error-message"
+        >
+          La contraseña es obligatoria
+        </div>
+        <div
+          *ngIf="
+            registerForm.errors?.['passwordWeak'] &&
+            showPasswordRequirements()
+          "
+          class="auth-error-message"
+        >
+          La contraseña no cumple todos los requisitos
+        </div>
+        <ul
+          *ngIf="showPasswordRequirements()"
+          class="password-requirements"
+          aria-live="polite"
+        >
+          <li
+            *ngFor="let rule of passwordRules"
+            class="password-requirements__item"
+            [class.is-met]="isPasswordRuleMet(rule)"
+          >
+            {{ rule.label }}
+          </li>
+        </ul>
+      </label>
+
+      <label class="auth-label">
+        Confirmar contraseña
+        <app-password-input
+          formControlName="confirmPassword"
+          autocomplete="new-password"
+          placeholder="Confirma tu contraseña"
+        />
+        <div
+          *ngIf="
+            registerForm.get('confirmPassword')?.errors?.['required'] &&
+            registerForm.get('confirmPassword')?.dirty
+          "
+          class="auth-error-message"
+        >
+          Confirma tu contraseña
+        </div>
+        <p
+          *ngIf="showPasswordMatchStatus()"
+          class="password-match-status"
+          [class.is-met]="passwordsMatch()"
+          [class.is-error]="passwordsMismatch()"
+          aria-live="polite"
+        >
+          {{
+            passwordsMatch()
+              ? 'Las contraseñas coinciden'
+              : 'Las contraseñas no coinciden'
+          }}
+        </p>
+      </label>
+
+      <div class="auth-form__actions">
+        <button
+          class="auth-submit"
+          type="submit"
+          [disabled]="registerForm.invalid || registerForm.pending || isLoading"
+        >
+          {{ isLoading ? "Creando cuenta..." : "Crear cuenta" }}
+        </button>
+      </div>
+    </form>
+
+    <div *ngIf="errorMessage" class="auth-error">
+      {{ errorMessage }}
+    </div>
+
+    <p class="auth-footer">
+      ¿Ya tienes cuenta?
+      <a routerLink="/login" class="auth-link">Inicia sesión</a>
+    </p>
+  </div>
+</section>

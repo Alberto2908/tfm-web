@@ -1,0 +1,25 @@
+.profile-section {
+  margin: var(--tfm-space-md) 0 var(--tfm-space-lg);
+  padding-top: var(--tfm-space-lg);
+  border-top: 1px solid var(--tfm-border);
+}
+
+.profile-section__title {
+  margin: 0 0 var(--tfm-space-xs);
+  font-family: var(--tfm-font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--tfm-text);
+}
+
+.profile-section__hint {
+  margin: 0;
+  color: var(--tfm-text-muted);
+  font-size: 0.875rem;
+}
+
+.tfm-form input[readonly] {
+  background: var(--tfm-bg-alt);
+  color: var(--tfm-text-secondary);
+  cursor: not-allowed;
+}

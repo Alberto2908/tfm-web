@@ -1,0 +1,158 @@
+<div class="ver-container">
+  <header class="page-header">
+    <h1 class="page-header__title">Mi perfil</h1>
+    <p class="page-header__subtitle">
+      Consulta y actualiza tu correo electrónico o contraseña. El nombre de usuario no se puede modificar.
+    </p>
+  </header>
+
+  <nz-card class="vulnerabilidad-card form-card" [nzBordered]="true">
+    <nz-spin [nzSpinning]="isLoading">
+      <form
+        nz-form
+        nzLayout="vertical"
+        class="tfm-form"
+        [formGroup]="profileForm"
+        (ngSubmit)="submitForm()"
+      >
+        <div class="tfm-form-grid">
+          <nz-form-item>
+            <nz-form-label nzFor="username">Nombre de usuario</nz-form-label>
+            <nz-form-control>
+              <input nz-input id="username" formControlName="username" readonly />
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzFor="email" nzRequired>Correo electrónico</nz-form-label>
+            <nz-form-control
+              [nzErrorTip]="
+                profileForm.get('email')?.errors?.['emailTaken']
+                  ? 'El email ya está registrado'
+                  : 'Introduce un email válido'
+              "
+              [nzValidateStatus]="
+                profileForm.get('email')?.pending ? 'validating' : ''
+              "
+            >
+              <input
+                nz-input
+                id="email"
+                type="email"
+                formControlName="email"
+                placeholder="tu@email.com"
+                autocomplete="email"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div class="profile-section">
+          <h2 class="profile-section__title">Cambiar contraseña</h2>
+          <p class="profile-section__hint">
+            Deja estos campos en blanco si no quieres cambiar la contraseña.
+          </p>
+        </div>
+
+        <div class="tfm-form-grid">
+          <nz-form-item>
+            <nz-form-label nzFor="currentPassword">Contraseña actual</nz-form-label>
+            <nz-form-control
+              [nzErrorTip]="
+                profileForm.errors?.['currentPasswordRequired']
+                  ? 'Introduce tu contraseña actual'
+                  : ''
+              "
+            >
+              <app-password-input
+                formControlName="currentPassword"
+                inputId="currentPassword"
+                autocomplete="current-password"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div class="tfm-form-grid">
+          <nz-form-item>
+            <nz-form-label nzFor="newPassword">Nueva contraseña</nz-form-label>
+            <nz-form-control
+              [nzErrorTip]="
+                profileForm.errors?.['passwordWeak']
+                  ? 'La contraseña no cumple todos los requisitos'
+                  : ''
+              "
+            >
+              <app-password-input
+                formControlName="newPassword"
+                inputId="newPassword"
+                autocomplete="new-password"
+              />
+              @if (showPasswordRequirements()) {
+                <ul class="password-requirements" aria-live="polite">
+                  @for (rule of passwordRules; track rule.key) {
+                    <li
+                      class="password-requirements__item"
+                      [class.is-met]="isPasswordRuleMet(rule)"
+                    >
+                      {{ rule.label }}
+                    </li>
+                  }
+                </ul>
+              }
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzFor="confirmPassword">Confirmar contraseña</nz-form-label>
+            <nz-form-control
+              [nzErrorTip]="
+                passwordsMismatch() ? 'Las contraseñas no coinciden' : ''
+              "
+            >
+              <app-password-input
+                formControlName="confirmPassword"
+                inputId="confirmPassword"
+                autocomplete="new-password"
+              />
+              @if (showPasswordMatchStatus()) {
+                <p
+                  class="password-match-status"
+                  [class.is-met]="passwordsMatch()"
+                  [class.is-error]="passwordsMismatch()"
+                  aria-live="polite"
+                >
+                  @if (passwordsMatch()) {
+                    Las contraseñas coinciden
+                  } @else {
+                    Las contraseñas no coinciden
+                  }
+                </p>
+              }
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div class="tfm-form-actions">
+          <button
+            nz-button
+            nzType="default"
+            type="button"
+            (click)="resetPasswordFields()"
+            [disabled]="isSubmitting"
+          >
+            Limpiar contraseñas
+          </button>
+          <button
+            nz-button
+            nzType="primary"
+            type="submit"
+            [disabled]="profileForm.invalid || profileForm.pending || isSubmitting"
+          >
+            Guardar cambios
+          </button>
+        </div>
+      </form>
+    </nz-spin>
+  </nz-card>
+</div>
