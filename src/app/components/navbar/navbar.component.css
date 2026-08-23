@@ -79,55 +79,14 @@
 }
 
 .tfm-navbar__logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--tfm-space-sm);
+  display: block;
   height: 64px;
   width: auto;
-  min-width: 60px;
   transition: transform var(--tfm-transition-bounce);
-}
-
-.tfm-navbar__shield {
-  color: var(--tfm-primary);
-  filter: drop-shadow(0 0 8px var(--tfm-primary-glow));
-  transition: transform var(--tfm-transition-base);
-}
-
-.tfm-navbar__brand:hover .tfm-navbar__shield {
-  transform: scale(1.1);
 }
 
 .tfm-navbar__brand:hover .tfm-navbar__logo {
   transform: scale(1.05);
-}
-
-.tfm-navbar__brand-text {
-  font-family: var(--tfm-font-display);
-  font-size: 1.75rem;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, var(--tfm-primary), var(--tfm-secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  position: relative;
-}
-
-/* Glow effect on brand text */
-.tfm-navbar__brand-text::before {
-  content: "TFM";
-  position: absolute;
-  left: 0;
-  top: 0;
-  background: linear-gradient(135deg, var(--tfm-primary), var(--tfm-secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  filter: blur(20px);
-  opacity: 0.5;
-  z-index: -1;
 }
 
 /* === NAVIGATION LINKS === */
@@ -398,10 +357,6 @@
 
   .tfm-navbar__logo {
     height: 48px;
-  }
-
-  .tfm-navbar__brand-text {
-    font-size: 1.5rem;
   }
 
   .tfm-navbar__links {

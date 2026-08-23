@@ -1,6 +1,11 @@
 <div class="home-container">
   <div class="home-hero">
     @if (isLoggedIn) {
+      <img
+        class="home-logo home-logo--greeting"
+        [src]="isDark() ? '/Logo_vert_1500x1000px_neg.png' : '/Logo_vert_1500x1000px_pos.png'"
+        alt="VulnRadar"
+      />
       <h1 class="home-title home-title--greeting">
         Hola, <span>{{ username }}</span>
       </h1>
@@ -59,11 +64,13 @@
 
       </div>
     } @else {
-      <h1 class="home-title">
-        <span>VulnRadar</span>
-      </h1>
+      <img
+        class="home-logo home-logo--hero"
+        [src]="isDark() ? '/Logo_vert_1500x1000px_neg.png' : '/Logo_vert_1500x1000px_pos.png'"
+        alt="VulnRadar"
+      />
       <p class="home-subtitle">
-        Decenas de miles de CVE reales importados de la NVD, clasificados por
+        Miles de CVE reales, clasificados por
         severidad CVSS y documentados con impacto, mitigación y referencias.
         Fíltralos, analízalos y expórtalos.
       </p>

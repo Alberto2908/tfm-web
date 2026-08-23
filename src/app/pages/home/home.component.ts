@@ -2,6 +2,7 @@ import { CommonModule, AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../service/auth.service';
+import { ThemeService } from '../../services/theme.service';
 import { Observable } from 'rxjs';
 import { User } from '../../interfaces/user';
 
@@ -14,6 +15,7 @@ import { User } from '../../interfaces/user';
 })
 export class HomeComponent {
   private authService = inject(AuthService);
+  private themeService = inject(ThemeService);
 
   isAuthenticated$ = this.authService.isAuthenticated$;
   currentUser$ = this.authService.currentUser$;
@@ -29,5 +31,9 @@ export class HomeComponent {
 
   get isAdmin(): boolean {
     return this.authService.isAdmin();
+  }
+
+  isDark(): boolean {
+    return this.themeService.isDark();
   }
 }

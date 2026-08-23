@@ -120,6 +120,24 @@
   display: inline;
 }
 
+/* === LOGO === */
+.home-logo {
+  display: block;
+  height: auto;
+  margin: 0 auto;
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.home-logo--hero {
+  width: min(320px, 70%);
+  margin-bottom: var(--tfm-space-lg);
+}
+
+.home-logo--greeting {
+  width: min(200px, 55%);
+  margin-bottom: var(--tfm-space-md);
+}
+
 /* === SUBTITLE === */
 .home-subtitle {
   font-size: clamp(1rem, 2.5vw, 1.2rem);

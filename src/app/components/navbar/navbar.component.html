@@ -2,12 +2,11 @@
   <div class="tfm-navbar__inner">
     <!-- Logo/Brand -->
     <a class="tfm-navbar__brand" routerLink="/" (click)="closeMenu()">
-      <div class="tfm-navbar__logo">
-        <svg class="tfm-navbar__shield" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-        <span class="tfm-navbar__brand-text">VulnRadar</span>
-      </div>
+      <img
+        class="tfm-navbar__logo"
+        [src]="isDark() ? '/Isotipo_2000x2000px_neg.png' : '/Isotipo_2000x2000px_pos.png'"
+        alt="VulnRadar"
+      />
     </a>
 
     <!-- Desktop Navigation - Login/Register (si NO autenticado) -->
